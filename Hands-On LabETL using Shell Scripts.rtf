@@ -131,7 +131,15 @@ In the terminal, run the following command to create a new shell script named cs
 \b0 theia@theiadocker-rajendraabro:/home/project$ touch csv2db.sh\par
 \b You need to add lines of code to the script that will xtract user name (field 1), user id (field 3), and home directory path (field 6) from /etc/passwd file using the cut command.\par
 bash csv2db.sh\par
-theia@theiadocker-rajendraabro:/home/project$ bash csv2db.sh\par
+\b0 # Extract phase\par
+\par
+echo "Extracting data"\par
+\par
+# Extract the columns 1 (user name), 2 (user id) and \par
+# 6 (home directory path) from /etc/passwd\par
+\par
+cut -d":" -f1,3,6 /etc/passwd\par
+\b theia@theiadocker-rajendraabro:/home/project$ bash csv2db.sh\par
 Extracting data\par
 root:0:/root\par
 daemon:1:/usr/sbin\par
@@ -162,7 +170,12 @@ cassandra:106:/var/lib/cassandra\par
 mongodb:107:/home/mongodb\par
 \b0 theia@theiadocker-rajendraabro:/home/project$ bash csv2db.sh\par
 Extracting data\par
-theia@theiadocker-rajendraabro:/home/project$ cat extracted-data.txt\par
+\fs40 # Transform phase\par
+echo "Transforming data"\par
+# read the extracted data and replace the colons with commas.\par
+\par
+tr ":" "," < extracted-data.txt  > transformed-data.csv\par
+\fs32 theia@theiadocker-rajendraabro:/home/project$ cat extracted-data.txt\par
 root:0:/root\par
 daemon:1:/usr/sbin\par
 bin:2:/bin\par
@@ -236,6 +249,14 @@ Transforming data\par
 Loading data\par
 You are now connected to database "template1" as user "postgres".\par
 COPY 27\par
+\fs40 # Load phase\par
+echo "Loading data"\par
+# Set the PostgreSQL password environment variable.\par
+# Replace <yourpassword> with your actual PostgreSQL password.\par
+export PGPASSWORD=<yourpassword>;\par
+# Send the instructions to connect to 'template1' and\par
+# copy the file to the table 'users' through command pipeline.\par
+echo "\\c template1;\\COPY users  FROM '/home/project/transformed-data.csv' DELIMITERS ',' CSV;" | psql --username=postgres --host=postgres\par
 \fs56 Exercise 6 - Execute the final script\fs32\par
 theia@theiadocker-rajendraabro:/home/project$ bash csv2db.sh\par
 Extracting data\par
